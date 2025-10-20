@@ -1,19 +1,15 @@
-
-
-
-
 #include "inputnum.h"
-#include <stdio.h>
+#include <limits.h>
 
 static int32_t currentInput = 0;
 
-void clear() {
+void clear(void) {
     currentInput = 0;
 }
 
 int32_t getInput(Buttons button) {
-   
-    switch(button) {
+    
+    switch (button) {
         case B0: currentInput = currentInput * 10 + 0; break;
         case B1: currentInput = currentInput * 10 + 1; break;
         case B2: currentInput = currentInput * 10 + 2; break;
@@ -29,37 +25,40 @@ int32_t getInput(Buttons button) {
     return currentInput;
 }
 
-int32_t performOperation(int32_t num1, int32_t num2, OPERATOR op) {
-   
-    switch(op) {
-        case PLUS:  return num1 + num2;
-        case MINUS: return num1 - num2;
-        case MULT:  return num1 * num2;
+int32_t performOperation(int32_t n1, int32_t n2, OPERATOR op) {
+    switch (op) {
+        case PLUS:  return n1 + n2;
+        case MINUS: return n1 - n2;
+        case MULT:  return n1 * n2;
         case DIV:
-            if (num2 == 0) { displayDiv0(); return 0; }
-            return num1 / num2; 
-        default:    return 0;
+            if (n2 == 0) return INT32_MAX;  
+            return n1 / n2;                 
+        default:   return 0;
     }
 }
 
-bool overLimitResult(int32_t num){ (void)num; return false; }
+bool overLimitResult(int32_t num) {
+   
+    return (num == INT32_MAX);
+}
+
 
 bool pressC(Buttons button) { return (button == BCL); }
 bool pressEq(Buttons button) { return (button == BEQ); }
 bool pressOperator(Buttons button) {
-    return (button == BPLUS || button == BMINUS ||  button == BMULT || button == BDIV);
+    return (button == BPLUS || button == BMINUS || button == BMULT || button == BDIV);
 }
 bool pressNumber(Buttons button) {
     return (button >= B0 && button <= B9);
 }
 
 OPERATOR readOperator(Buttons button) {
-    switch(button) {
-        case BPLUS: return PLUS;
+    switch (button) {
+        case BPLUS:  return PLUS;
         case BMINUS: return MINUS;
-        case BMULT: return MULT;
-        case BDIV:  return DIV;
-        default:    return ERR;
+        case BMULT:  return MULT;
+        case BDIV:   return DIV;
+        default:     return ERR;
     }
 }
 
