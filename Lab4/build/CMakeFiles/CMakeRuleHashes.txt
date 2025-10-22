@@ -1,0 +1,13 @@
+# Hashes of file build rules.
+c61a72bfe9ed4b2d62c8cf193f7692b4 CMakeFiles/Lab4_SPIPIO_pio_h
+02c88d5dfca727885150e399329ff80a SPIPIO.pio.h
+7623a1f20c3f79df2dd3db6eaa4f23ee pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_bin
+7623a1f20c3f79df2dd3db6eaa4f23ee pico-sdk/src/rp2_common/boot_stage2/CMakeFiles/bs2_default_padded_checksummed_asm
+f3eeafc072f15f0c8883617b856d52fd pico-sdk/src/rp2_common/boot_stage2/bs2_default.bin
+362c29d4f0b8eec5e7f20270a56e264f pico-sdk/src/rp2_common/boot_stage2/bs2_default_padded_checksummed.S
+b30c8b57576334ceaa9f3f3f5b18fe6b pico-sdk/src/rp2_common/pico_cyw43_driver/CMakeFiles/cyw43_driver_picow_cyw43_bus_pio_spi_pio_h
+ada08ca5866884ce6adeea84df5800f1 pico-sdk/src/rp2_common/pico_cyw43_driver/cyw43_bus_pio_spi.pio.h
+368b12faaba4a62fe4e1899525699618 pico-sdk/src/rp2_common/tinyusb/CMakeFiles/tinyusb_pico_pio_usb_usb_rx_pio_h
+368b12faaba4a62fe4e1899525699618 pico-sdk/src/rp2_common/tinyusb/CMakeFiles/tinyusb_pico_pio_usb_usb_tx_pio_h
+d1542ae67b590a6171c00b5f8d0eb75f pico-sdk/src/rp2_common/tinyusb/usb_rx.pio.h
+55aa753f33a53b1680d9af17d428ec0c pico-sdk/src/rp2_common/tinyusb/usb_tx.pio.h

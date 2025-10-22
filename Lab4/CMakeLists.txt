@@ -2,15 +2,15 @@ cmake_minimum_required(VERSION 3.13)
 
 include(pico_sdk_import.cmake)
 
-project(ts_test_skeleton)
+project(Lab4)
 
 pico_sdk_init()
 
-add_executable(ts_test_skeleton)
+add_executable(Lab4)
 
-pico_generate_pio_header(ts_test_skeleton ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
+pico_generate_pio_header(Lab4 ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
 
-target_sources(ts_test_skeleton PRIVATE 
+target_sources(Lab4 PRIVATE 
     ts_test_skeleton.c
     TouchScreen.c
     TFTMaster.c
@@ -20,7 +20,7 @@ target_sources(ts_test_skeleton PRIVATE
     
     )
 
-target_link_libraries(ts_test_skeleton PRIVATE 
+target_link_libraries(Lab4 PRIVATE 
     pico_stdlib 
     hardware_adc 
     hardware_gpio hardware_pio 
@@ -29,10 +29,6 @@ target_link_libraries(ts_test_skeleton PRIVATE
     pico_bootsel_via_double_reset
     )
 
-pico_add_extra_outputs(ts_test_skeleton)
-
-
-
-
+pico_add_extra_outputs(Lab4)
 
 
