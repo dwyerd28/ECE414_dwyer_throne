@@ -129,12 +129,12 @@ set(CMAKE_MAKEFILE_DEPENDS
   "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/pico-sdk/src/rp2_common/pico_unique_id/CMakeLists.txt"
   "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/pico-sdk/src/rp2_common/tinyusb/CMakeLists.txt"
   "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/pico-sdk/tools/CMakeLists.txt"
-  "C:/Users/dwyerd/Documents/pico/ece414_dwyer_throne/Lab5/CMakeLists.txt"
+  "C:/Users/throned/Documents/pico/ECE414_dwyer_throne/Lab5/CMakeLists.txt"
   "CMakeFiles/3.25.2/CMakeASMCompiler.cmake"
   "CMakeFiles/3.25.2/CMakeCCompiler.cmake"
   "CMakeFiles/3.25.2/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.25.2/CMakeSystem.cmake"
-  "C:/Users/dwyerd/Documents/pico/ece414_dwyer_throne/Lab5/pico_sdk_import.cmake"
+  "C:/Users/throned/Documents/pico/ECE414_dwyer_throne/Lab5/pico_sdk_import.cmake"
   )
 
 # The corresponding makefile is:

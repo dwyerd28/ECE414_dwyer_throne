@@ -12,17 +12,17 @@
 
 // TODO: CALIBRATION - You need to determine these values experimentally!
 // Run the touchscreen_demo and note the min/max values when touching screen corners
-#define TS_MIN_X 700      // TODO: Replace with your measured minimum X value
-#define TS_MAX_X 3600     // TODO: Replace with your measured maximum X value  
-#define TS_MIN_Y 500      // TODO: Replace with your measured minimum Y value
-#define TS_MAX_Y 3600     // TODO: Replace with your measured maximum Y value
+#define TS_MIN_X 750      // TODO: Replace with your measured minimum X value
+#define TS_MAX_X 3300     // TODO: Replace with your measured maximum X value  
+#define TS_MIN_Y 0      // TODO: Replace with your measured minimum Y value
+#define TS_MAX_Y 60     // TODO: Replace with your measured maximum Y value
 
 // Screen resolution constants (don't change these)
 #define ADAFRUIT_LCD_MAX_X 239
 #define ADAFRUIT_LCD_MAX_Y 319
 
 // TODO: PRESSURE_THRESHOLD - Determine what Z value indicates a valid touch
-#define PRESSURE_THRESHOLD 1000  // TODO: Adjust based on your testing
+#define PRESSURE_THRESHOLD 800  // TODO: Adjust based on your testing
 
 /* 
  * Linear interpolation function - COMPLETE VERSION
@@ -59,11 +59,9 @@ bool get_ts_lcd(uint16_t *px, uint16_t *py) {
     // STEP 1: Get raw touch point data
     // HINT: Use the getPoint() function from TouchScreen.h
     // You'll need to create a TSPoint struct variable that we discussed in the lecture yesterday
-    
     // STEP 2: Apply linear interpolation to convert raw X to LCD X
     // HINT: Use your linear_interpolate function with the X calibration values
     // Remember: LCD X ranges from 0 to ADAFRUIT_LCD_MAX_X
-    
     // STEP 3: Apply linear interpolation to convert raw Y to LCD Y  
     // HINT: Same as step 2 but for Y coordinates
     // LCD Y ranges from 0 to ADAFRUIT_LCD_MAX_Y
@@ -114,6 +112,6 @@ void ts_lcd_init() {
     adc_init();
     tft_init_hw();
     tft_begin();
-    tft_setRotation(3);
+    tft_setRotation(0);
     tft_fillScreen(ILI9340_BLACK);
 }

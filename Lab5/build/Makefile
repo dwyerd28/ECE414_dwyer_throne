@@ -46,10 +46,10 @@ RM = "C:\Program Files\Raspberry Pi\Pico SDK v1.5.1\cmake\bin\cmake.exe" -E rm -
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5
+CMAKE_SOURCE_DIR = C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build
+CMAKE_BINARY_DIR = C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -76,9 +76,9 @@ rebuild_cache\fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build\CMakeFiles C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build\\CMakeFiles\progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build\CMakeFiles C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build\\CMakeFiles\progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 /nologo -$(MAKEFLAGS) all
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build\CMakeFiles 0
 .PHONY : all
 
 # The main clean target

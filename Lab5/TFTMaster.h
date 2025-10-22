@@ -127,8 +127,6 @@
 #define ILI9340_MAGENTA 0xF81F
 #define ILI9340_YELLOW  0xFFE0
 #define ILI9340_WHITE   0xFFFF
-#define ILI9340_ORANGE 0xFD20
-#define ILI9340_DARKGREY 0x7BEF
 
 #define tabspace 4
 

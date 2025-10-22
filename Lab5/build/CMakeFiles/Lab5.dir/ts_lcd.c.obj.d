@@ -1,5 +1,5 @@
 CMakeFiles\Lab5.dir\ts_lcd.c.obj: \
- C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\ts_lcd.c \
+ C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\ts_lcd.c \
  C:\PROGRA~1\RASPBE~1\PICOSD~1.1\pico-sdk\src\common\PICO_S~1\include/pico/stdlib.h \
  C:\PROGRA~1\RASPBE~1\PICOSD~1.1\pico-sdk\src\common\PICO_B~1\include/pico.h \
  C:\PROGRA~1\RASPBE~1\PICOSD~1.1\pico-sdk\src\common\PICO_B~1\include/pico/types.h \
@@ -18,9 +18,9 @@ CMakeFiles\Lab5.dir\ts_lcd.c.obj: \
  c:\progra~1\raspbe~1\picosd~1.1\gcc-ar~1\arm-none-eabi\include\sys\_intsup.h \
  c:\progra~1\raspbe~1\picosd~1.1\gcc-ar~1\arm-none-eabi\include\sys\_stdint.h \
  c:\progra~1\raspbe~1\picosd~1.1\gcc-ar~1\lib\gcc\arm-none-eabi\10.3.1\include\stddef.h \
- C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build\generated\pico_base/pico/version.h \
+ C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build\generated\pico_base/pico/version.h \
  C:\PROGRA~1\RASPBE~1\PICOSD~1.1\pico-sdk\src\common\PICO_B~1\include/pico/config.h \
- C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build\generated\pico_base/pico/config_autogen.h \
+ C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build\generated\pico_base/pico/config_autogen.h \
  C:/Program\ Files/Raspberry\ Pi/Pico\ SDK\ v1.5.1/pico-sdk/src/boards/include/boards/pico.h \
  C:/Program\ Files/Raspberry\ Pi/Pico\ SDK\ v1.5.1/pico-sdk/src/rp2_common/cmsis/include/cmsis/rename_exceptions.h \
  C:\PROGRA~1\RASPBE~1\PICOSD~1.1\pico-sdk\src\RP2_CO~1\PICO_P~1\include/pico/platform.h \
@@ -56,6 +56,6 @@ CMakeFiles\Lab5.dir\ts_lcd.c.obj: \
  C:\PROGRA~1\RASPBE~1\PICOSD~1.1\pico-sdk\src\rp2040\HARDWA~1\include/hardware/regs/adc.h \
  c:\progra~1\raspbe~1\picosd~1.1\gcc-ar~1\arm-none-eabi\include\inttypes.h \
  c:\progra~1\raspbe~1\picosd~1.1\gcc-ar~1\arm-none-eabi\include\sys\_locale.h \
- C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\TouchScreen.h \
- C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\TFTMaster.h \
- C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\ts_lcd.h
+ C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\TouchScreen.h \
+ C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\TFTMaster.h \
+ C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\ts_lcd.h
