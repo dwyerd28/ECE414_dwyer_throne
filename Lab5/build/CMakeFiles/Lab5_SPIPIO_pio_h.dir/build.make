@@ -42,10 +42,10 @@ RM = "C:\Program Files\Raspberry Pi\Pico SDK v1.5.1\cmake\bin\cmake.exe" -E rm -
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5
+CMAKE_SOURCE_DIR = C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build
+CMAKE_BINARY_DIR = C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build
 
 # Utility rule file for Lab5_SPIPIO_pio_h.
 
@@ -57,9 +57,9 @@ include CMakeFiles\Lab5_SPIPIO_pio_h.dir\progress.make
 
 CMakeFiles\Lab5_SPIPIO_pio_h: SPIPIO.pio.h
 
-SPIPIO.pio.h: C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\SPIPIO.pio
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating SPIPIO.pio.h"
-	echo >nul && "C:\Program Files\Raspberry Pi\Pico SDK v1.5.1\pico-sdk-tools\pioasm.exe" -o c-sdk C:/Users/throned/Documents/pico/ECE414_dwyer_throne/Lab5/SPIPIO.pio C:/Users/throned/Documents/pico/ECE414_dwyer_throne/Lab5/build/SPIPIO.pio.h
+SPIPIO.pio.h: C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\SPIPIO.pio
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating SPIPIO.pio.h"
+	echo >nul && "C:\Program Files\Raspberry Pi\Pico SDK v1.5.1\pico-sdk-tools\pioasm.exe" -o c-sdk C:/Users/dwyerd/Documents/pico/ece414_dwyer_throne/Lab5/SPIPIO.pio C:/Users/dwyerd/Documents/pico/ece414_dwyer_throne/Lab5/build/SPIPIO.pio.h
 
 Lab5_SPIPIO_pio_h: CMakeFiles\Lab5_SPIPIO_pio_h
 Lab5_SPIPIO_pio_h: SPIPIO.pio.h
@@ -75,6 +75,6 @@ CMakeFiles\Lab5_SPIPIO_pio_h.dir\clean:
 .PHONY : CMakeFiles\Lab5_SPIPIO_pio_h.dir\clean
 
 CMakeFiles\Lab5_SPIPIO_pio_h.dir\depend:
-	$(CMAKE_COMMAND) -E cmake_depends "NMake Makefiles" C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5 C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5 C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build C:\Users\throned\Documents\pico\ECE414_dwyer_throne\Lab5\build\CMakeFiles\Lab5_SPIPIO_pio_h.dir\DependInfo.cmake --color=$(COLOR)
+	$(CMAKE_COMMAND) -E cmake_depends "NMake Makefiles" C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5 C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5 C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build C:\Users\dwyerd\Documents\pico\ece414_dwyer_throne\Lab5\build\CMakeFiles\Lab5_SPIPIO_pio_h.dir\DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles\Lab5_SPIPIO_pio_h.dir\depend
 

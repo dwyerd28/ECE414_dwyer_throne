@@ -8,14 +8,14 @@
 // Display window:
 #define DISP_X       10
 #define DISP_Y       10
-#define DISP_W       300
+#define DISP_W       250
 #define DISP_H       40
 
 // Buttons: 4 cols x 4 rows
-#define BTN_W        60
+#define BTN_W        50
 #define BTN_H        36
-#define BTN_SP       8
-#define COL1_X       15
+#define BTN_SP       10
+#define COL1_X       10
 #define COL2_X       (COL1_X + BTN_W + BTN_SP)           // 83
 #define COL3_X       (COL2_X + BTN_W + BTN_SP)           // 151
 #define COL4_X       (COL3_X + BTN_W + BTN_SP)           // 219
