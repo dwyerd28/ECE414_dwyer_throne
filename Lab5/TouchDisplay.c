@@ -3,15 +3,13 @@
 #include "ts_lcd.h"
 #include <stdio.h>
 
-// ---- Screen geometry (320x240) ----
-// Keep everything on-screen (prior issue: bottom row was off-screen).
-// Display window:
+
 #define DISP_X       10
 #define DISP_Y       10
 #define DISP_W       250
 #define DISP_H       40
 
-// Buttons: 4 cols x 4 rows
+
 #define BTN_W        50
 #define BTN_H        36
 #define BTN_SP       10
@@ -44,7 +42,7 @@ void drawCalcScreen() {
     tft_setTextColor(ILI9340_BLACK);
     tft_writeString("0");
 
-    // Layout (row-major):
+    
     // Row1: 7 8 9 +
     draw_btn(COL1_X, ROW1_Y, "7");
     draw_btn(COL2_X, ROW1_Y, "8");
