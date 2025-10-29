@@ -2,6 +2,7 @@
 #include "TouchDisplay.h"
 #include "inputnum.h"
 #include "ts_lcd.h"
+#include "TouchDisplay.c"
 
 #include <stdio.h>
 
