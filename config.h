@@ -12,10 +12,10 @@
 
 // timing
 #define PEN_SETTLE_MS 150  //delay
-#define FSM_TICK_MS   5     
-
-
-//if distance (in mm) from current coordinate to next coordinate is 
-//greater than this we go to TRAVEL (pen up)
+#define FSM_TICK_MS   5
 #define COORD_DIFF_THRESH_MM 10.0f
+
+// changes to 1 to flip motor direction
+#define INVERT_MOTOR_A_DIR 0
+#define INVERT_MOTOR_B_DIR 0
 
