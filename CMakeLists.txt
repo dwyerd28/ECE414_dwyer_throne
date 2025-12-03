@@ -32,9 +32,11 @@ target_link_libraries(ECE414_Final PRIVATE
     hardware_pwm    
     hardware_gpio    
     hardware_i2c     
-    hardware.pio
-    hardware.adc
+    hardware_pio
+    hardware_adc
 )
+
+target_include_directories(ECE414_Final PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 pico_enable_stdio_usb(ECE414_Final 1)   
 pico_enable_stdio_uart(ECE414_Final 1)
