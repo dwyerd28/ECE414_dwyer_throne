@@ -36,9 +36,10 @@ target_link_libraries(ECE414_Final PRIVATE
     hardware.adc
 )
 
-pico_enable_stdio_usb(<your_target> 1)   
-pico_enable_stdio_uart(<your_target> 1)
+pico_enable_stdio_usb(ECE414_Final 1)   
+pico_enable_stdio_uart(ECE414_Final 1)
 
 
 # ---- BUILD OUTPUT ----
 pico_add_extra_outputs(ECE414_Final)
+
