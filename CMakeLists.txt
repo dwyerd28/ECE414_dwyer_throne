@@ -10,7 +10,7 @@ pico_sdk_init()
 # ---- SOURCE FILES ----
 add_executable(ECE414_Final)
 
-pico_generate_pio_header(<your_target> ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
+pico_generate_pio_header(ECE414_Final ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
 
 target_sources(ECE414_Final PRIVATE
     main.c
@@ -42,4 +42,5 @@ pico_enable_stdio_uart(ECE414_Final 1)
 
 # ---- BUILD OUTPUT ----
 pico_add_extra_outputs(ECE414_Final)
+
 
