@@ -40,11 +40,11 @@ static void draw_static_ui(void) {
     tft_setTextSize(2);
 
     tft_setCursor(HEADER_X, HEADER_Y);
-    tft_setTextColor(COLOR_TEXT, COLOR_BG);
+    tft_setTextColor2(COLOR_TEXT, COLOR_BG);
     tft_writeString("Drawing Progress");
 
     tft_setCursor(PERCENT_X, PERCENT_Y);
-    tft_setTextColor(COLOR_TEXT, COLOR_BG);
+    tft_setTextColor2(COLOR_TEXT, COLOR_BG);
     tft_writeString("0% complete");
 
     
@@ -96,7 +96,7 @@ void lcd_progress_update(size_t current_index, size_t total_points) {
 
         sprintf(buf, "%d%% complete", percent);
         tft_setCursor(PERCENT_X, PERCENT_Y);
-        tft_setTextColor(COLOR_TEXT, COLOR_BG);
+        tft_setTextColor2(COLOR_TEXT, COLOR_BG);
         tft_writeString(buf);
 
         last_percent = percent;

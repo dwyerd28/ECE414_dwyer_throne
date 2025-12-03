@@ -1,32 +1,44 @@
 cmake_minimum_required(VERSION 3.13)
 
-include(pico_sdk_import.cmake)
+ include(pico_sdk_import.cmake)
+
 
 project(ECE414_Final)
 
 pico_sdk_init()
 
 # ---- SOURCE FILES ----
-add_executable(ECE414_Final
+add_executable(ECE414_Final)
+
+pico_generate_pio_header(<your_target> ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
+
+target_sources(ECE414_Final PRIVATE
     main.c
     motor.c     # GPIO-based control for two NEMA17 motors
-   # servo.c       # SG90 servo driver
-    limits.c      # Establishes the limits for X and Y positions
+    limit.c      # Establishes the limits for X and Y positions
+    coord_setup.c
+    glcdfont.c
+    lcd_progress.c
+    TFTMaster.c
+    TouchScreen.c
+    ts_lcd.c
 
 
 )
 
 # ---- LIBRARIES ----
-target_link_libraries(ECE414_Final
-    pico_stdlib     # basic Pico features
-    hardware_pwm     # SG90 servo
-    hardware_gpio    # GPIO steppers
-    hardware_i2c     # LCD (I2C)
+target_link_libraries(ECE414_Final PRIVATE
+    pico_stdlib     
+    hardware_pwm    
+    hardware_gpio    
+    hardware_i2c     
+    hardware.pio
+    hardware.adc
 )
 
-# ---- ENABLE USB STDIO (optional) ----
-pico_enable_stdio_usb(ECE414_Final 1)
-pico_enable_stdio_uart(ECE414_Final 0)
+pico_enable_stdio_usb(<your_target> 1)   
+pico_enable_stdio_uart(<your_target> 1)
+
 
 # ---- BUILD OUTPUT ----
 pico_add_extra_outputs(ECE414_Final)
