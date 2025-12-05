@@ -1,17 +1,16 @@
-// main.c — Drawing FSM with LCD progress bar
-
+// main.c
 #include "pico/stdlib.h"
-#include <stdio.h>
-#include <math.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
 
-#include "config.h"
-#include "coord_setup.h"
+#include "coordsetup.h"
 #include "limits.h"
 #include "motor.h"
-#include "lcd_progress.h"
+#include "servo.h"
+#include "ui_lcd.h"
 
-// ---------- FSM states ----------
+// FSM states
 typedef enum {
     ST_BOOT = 0,
     ST_LOAD,
@@ -22,187 +21,212 @@ typedef enum {
     ST_DONE
 } State;
 
-// ---------- Helpers: get current pose in mm ----------
-
-static void get_pose_mm(float* x_mm, float* y_mm) {
-    MotorPose p = motor_get_pose();  // position in steps
-    float sx = coord_steps_per_mm_x();
-    float sy = coord_steps_per_mm_y();
-
-    // avoid divide-by-zero if calibration not set
-    if (sx <= 0.0f) {
-        sx = 1.0f;
+static const char *state_name(State s) {
+    switch (s) {
+        case ST_BOOT:     return "ST_BOOT";
+        case ST_LOAD:     return "ST_LOAD";
+        case ST_PEN_UP:   return "ST_PEN_UP";
+        case ST_MOVE:     return "ST_MOVE";
+        case ST_PEN_DOWN: return "ST_PEN_DOWN";
+        case ST_DRAW:     return "ST_DRAW";
+        case ST_DONE:     return "ST_DONE";
+        default:          return "UNKNOWN";
     }
-    if (sy <= 0.0f) {
-        sy = 1.0f;
-    }
-
-    *x_mm = ((float)p.x_steps) / sx;
-    *y_mm = ((float)p.y_steps) / sy;
 }
 
-// Euclidean distance (mm) from current pose to a target point
-static float distance_to_target_mm(const Point* pt) {
-    float cx;
-    float cy;
-    get_pose_mm(&cx, &cy);
-
-    float dx = ((float)pt->x) - cx;
-    float dy = ((float)pt->y) - cy;
-
-    float d2 = dx * dx + dy * dy;
-    float d  = sqrtf(d2);
-
-    return d;
-}
-
-int main(void) {
+int main() {
     stdio_init_all();
-    sleep_ms(500);
-    printf("ECE414 Final: booting...\n");
+    sleep_ms(500);  // small startup delay to let USB come up
 
-    // ----- Initialize hardware subsystems -----
-    motor_init();       // stepper motors (CoreXY)
-    motor_pen_init();   // servo on, pen up
-    limits_init(X_MIN_MM, X_MAX_MM, Y_MIN_MM, Y_MAX_MM);
+    printf("\n=== CoreXY Drawing Robot Start ===\n");
 
-    // ----- Load drawing path -----
-    size_t path_len = 0;
-    const Point* path = coord_get_path(&path_len);
+    limits_init();
+    motor_init();
+    servo_init();
+    ui_lcd_init();
 
-    printf("Path length reported: %u points\n", (unsigned)path_len);
+    State state = ST_BOOT;
+    bool pen_is_down = false;
 
-    // Index of "next point to go to"
-    size_t idx = 0;
+    size_t point_count = 0;
+    size_t point_index = 0;
 
-    // ----- Initialize LCD progress UI -----
-    lcd_progress_init(path_len);
-    lcd_progress_update(idx, path_len);   // start at 0%
+    //printf("[INIT] Finished hardware init, entering main loop.\n");
 
-    // ----- FSM bootstrap -----
-    State st = ST_BOOT;
-    State prev = (State)(-1);   // for debug printing
+    while (1) {
+        // Optional small delay so prints are readable and USB isn't spammed
+        sleep_ms(5);
 
-    while (true) {
+        switch (state) {
 
-        // DEBUG: print state transitions
-        if (st != prev) {
-            printf("FSM: state changed to %d (idx=%u)\n", st, (unsigned)idx);
-            prev = st;
+        case ST_BOOT:
+            printf("[FSM] State = %s\n", state_name(state));
+            printf("[BOOT] Transitioning to ST_LOAD.\n");
+            state = ST_LOAD;
+            break;
+
+        case ST_LOAD:
+            printf("[FSM] State = %s\n", state_name(state));
+            point_count = coord_get_count();
+            point_index = 0;
+            printf("[LOAD] Path loaded with %u points.\n", (unsigned int)point_count);
+
+            ui_lcd_update_progress(0, point_count);
+
+            printf("[LOAD] Forcing pen up, going to ST_PEN_UP.\n");
+            state = ST_PEN_UP;
+            break;
+
+        case ST_PEN_UP:
+            printf("[FSM] State = %s\n", state_name(state));
+            if (pen_is_down) {
+                printf("[PEN_UP] Pen is currently DOWN, raising pen.\n");
+                pen_up();
+                pen_is_down = false;
+            } else {
+                printf("[PEN_UP] Pen already UP, nothing to do.\n");
+            }
+            printf("[PEN_UP] Moving to ST_MOVE.\n");
+            state = ST_MOVE;
+            break;
+
+        case ST_MOVE: {
+            printf("[FSM] State = %s\n", state_name(state));
+
+            if (point_index >= point_count) {
+                printf("[MOVE] No more points (index=%u, count=%u). Going to ST_DONE.\n",
+                       (unsigned int)point_index, (unsigned int)point_count);
+                state = ST_DONE;
+                break;
+            }
+
+            const DrawPoint *pt = coord_get_point(point_index);
+            if (!pt) {
+                printf("[MOVE] coord_get_point returned NULL at index %u. Going to ST_DONE.\n",
+                       (unsigned int)point_index);
+                state = ST_DONE;
+                break;
+            }
+
+            printf("[MOVE] Point %u: (x=%.2f mm, y=%.2f mm, pen_down=%d)\n",
+                   (unsigned int)point_index, pt->x_mm, pt->y_mm, pt->pen_down ? 1 : 0);
+
+            // If the next point wants pen down, we should go to ST_PEN_DOWN instead
+            if (pt->pen_down) {
+                printf("[MOVE] Next segment requires pen DOWN. Switching to ST_PEN_DOWN.\n");
+                state = ST_PEN_DOWN;
+                break;
+            }
+
+            // Travel move (pen up)
+            if (!limits_within(pt->x_mm, pt->y_mm)) {
+                printf("[LIMIT] Travel target OUT OF BOUNDS! (x=%.2f, y=%.2f)\n",
+                       pt->x_mm, pt->y_mm);
+                printf("[LIMIT] Emergency stop and transitioning to ST_DONE.\n");
+                motor_emergency_stop();
+                state = ST_DONE;
+                break;
+            }
+
+            printf("[MOVE] Moving (pen UP) to (%.2f, %.2f)\n", pt->x_mm, pt->y_mm);
+            motor_move_to_mm(pt->x_mm, pt->y_mm);
+
+            point_index++;
+            printf("[MOVE] Completed point %u of %u.\n",
+                   (unsigned int)point_index, (unsigned int)point_count);
+
+            ui_lcd_update_progress(point_index, point_count);
+            // Stay in ST_MOVE to keep handling travel points
+            break;
         }
 
-        switch (st) {
+        case ST_PEN_DOWN:
+            printf("[FSM] State = %s\n", state_name(state));
+            if (!pen_is_down) {
+                printf("[PEN_DOWN] Lowering pen.\n");
+                pen_down();
+                pen_is_down = true;
+            } else {
+                printf("[PEN_DOWN] Pen already DOWN.\n");
+            }
+            printf("[PEN_DOWN] Moving to ST_DRAW.\n");
+            state = ST_DRAW;
+            break;
 
-            case ST_BOOT:
-                // Raise pen and go to the first state
-                motor_pen_up();
-                sleep_ms(PEN_SETTLE_MS);
-                idx = 0;
-                lcd_progress_update(idx, path_len);
-                st = ST_LOAD;
+        case ST_DRAW: {
+            printf("[FSM] State = %s\n", state_name(state));
+
+            if (point_index >= point_count) {
+                printf("[DRAW] No more points (index=%u, count=%u). Going to ST_DONE.\n",
+                       (unsigned int)point_index, (unsigned int)point_count);
+                state = ST_DONE;
                 break;
+            }
 
-            case ST_LOAD:
-                // If we've processed all points, we're done
-                if (idx >= path_len) {
-                    printf("ST_LOAD: idx >= path_len (%u >= %u), going to ST_DONE\n",
-                           (unsigned)idx, (unsigned)path_len);
-                    st = ST_DONE;
-                    break;
-                }
-
-                {
-                    const Point* next = &path[idx];
-
-                    // Skip any out-of-bounds points (just in case)
-                    if (!limits_point_ok_mm((float)next->x, (float)next->y)) {
-                        printf("ST_LOAD: point %u out of bounds (%.1f, %.1f), skipping\n",
-                               (unsigned)idx, (float)next->x, (float)next->y);
-                        idx = idx + 1;
-                        lcd_progress_update(idx, path_len);
-                        st = ST_LOAD;
-                        break;
-                    }
-
-                    // Decide whether this should be a TRAVEL (pen up)
-                    // or DRAW (pen down) based on distance + draw flag.
-                    float dist = distance_to_target_mm(next);
-                    printf("ST_LOAD: next point %u = (%.1f, %.1f, draw=%d), dist=%.2f mm\n",
-                           (unsigned)idx, (float)next->x, (float)next->y,
-                           next->draw ? 1 : 0, dist);
-
-                    if (dist > COORD_DIFF_THRESH_MM) {
-                        // Far away -> travel with pen up
-                        st = ST_PEN_UP;
-                    } else {
-                        if (next->draw) {
-                            // Close and drawing point -> draw with pen down
-                            st = ST_PEN_DOWN;
-                        } else {
-                            // Close but not drawing -> still travel pen up
-                            st = ST_PEN_UP;
-                        }
-                    }
-                }
+            const DrawPoint *pt = coord_get_point(point_index);
+            if (!pt) {
+                printf("[DRAW] coord_get_point returned NULL at index %u. Going to ST_DONE.\n",
+                       (unsigned int)point_index);
+                state = ST_DONE;
                 break;
+            }
 
-            case ST_PEN_UP:
-                motor_pen_up();
-                sleep_ms(PEN_SETTLE_MS);
-                st = ST_MOVE;   // next: move with pen up
+            printf("[DRAW] Point %u: (x=%.2f mm, y=%.2f mm, pen_down=%d)\n",
+                   (unsigned int)point_index, pt->x_mm, pt->y_mm, pt->pen_down ? 1 : 0);
+
+            // If this point is a travel point (pen_up), switch back to ST_PEN_UP
+            if (!pt->pen_down) {
+                printf("[DRAW] Next segment is travel (pen UP). Switching to ST_PEN_UP.\n");
+                state = ST_PEN_UP;
                 break;
+            }
 
-            case ST_MOVE:
-                // Travel to next coordinate (pen is up)
-                if (idx < path_len) {
-                    const Point* tgt = &path[idx];
-                    printf("ST_MOVE: moving pen-up to (%.1f, %.1f)\n",
-                           (float)tgt->x, (float)tgt->y);
-                    motor_move_to_mm((float)tgt->x, (float)tgt->y);
-
-                    idx = idx + 1;                       // completed this waypoint
-                    lcd_progress_update(idx, path_len);  // update LCD progress
-                }
-                st = ST_LOAD;                            // decide next action
+            if (!limits_within(pt->x_mm, pt->y_mm)) {
+                printf("[LIMIT] DRAW target OUT OF BOUNDS! (x=%.2f, y=%.2f)\n",
+                       pt->x_mm, pt->y_mm);
+                printf("[LIMIT] Emergency stop and transitioning to ST_DONE.\n");
+                motor_emergency_stop();
+                state = ST_DONE;
                 break;
+            }
 
-            case ST_PEN_DOWN:
-                motor_pen_down();
-                sleep_ms(PEN_SETTLE_MS);
-                st = ST_DRAW;   // next: move with pen down
-                break;
+            printf("[DRAW] Moving (pen DOWN) to (%.2f, %.2f)\n", pt->x_mm, pt->y_mm);
+            motor_move_to_mm(pt->x_mm, pt->y_mm);
 
-            case ST_DRAW:
-                // Draw to next coordinate (pen is down)
-                if (idx < path_len) {
-                    const Point* tgt = &path[idx];
-                    printf("ST_DRAW: moving pen-down to (%.1f, %.1f)\n",
-                           (float)tgt->x, (float)tgt->y);
-                    motor_move_to_mm((float)tgt->x, (float)tgt->y);
+            point_index++;
+            printf("[DRAW] Completed point %u of %u.\n",
+                   (unsigned int)point_index, (unsigned int)point_count);
 
-                    idx = idx + 1;                       // completed this waypoint
-                    lcd_progress_update(idx, path_len);  // update LCD progress
-                }
-                st = ST_LOAD;                            // decide next action
-                break;
-
-            case ST_DONE:
-                // Finished path: pen up, show 100%, and park forever
-                printf("FSM: ST_DONE reached. Path complete.\n");
-                motor_pen_up();
-                sleep_ms(250);
-                lcd_progress_update(path_len, path_len);
-
-                while (1) {
-                    tight_loop_contents();
-                }
-                // no break; main loop ends inside while(1)
+            ui_lcd_update_progress(point_index, point_count);
+            // Stay in ST_DRAW while pen_down points continue
+            break;
         }
 
-        // FSM pacing (motion calls themselves are blocking)
-        sleep_ms(FSM_TICK_MS);
+        case ST_DONE:
+            printf("[FSM] State = %s\n", state_name(state));
+            printf("[DONE] Drawing complete or stopped. Showing DONE message.\n");
+            ui_lcd_show_done();
+
+            if (pen_is_down) {
+                printf("[DONE] Lifting pen.\n");
+                pen_up();
+                pen_is_down = false;
+            }
+
+            printf("[DONE] Entering idle loop.\n");
+            while (1) {
+                tight_loop_contents();
+            }
+            break;
+
+        default:
+            printf("[ERROR] Unknown state %d, forcing ST_DONE.\n", state);
+            state = ST_DONE;
+            break;
+        }
     }
 
-    // Not reached
     return 0;
 }
+
+

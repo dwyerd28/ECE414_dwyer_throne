@@ -15,13 +15,13 @@ pico_generate_pio_header(ECE414_Final ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
 target_sources(ECE414_Final PRIVATE
     main.c
     motor.c     # GPIO-based control for two NEMA17 motors
-    limit.c      # Establishes the limits for X and Y positions
-    coord_setup.c
+    limits.c      # Establishes the limits for X and Y positions
+    coordsetup.c
     glcdfont.c
-    lcd_progress.c
+    ui_lcd.c
+    servo.c
     TFTMaster.c
-    TouchScreen.c
-    ts_lcd.c
+    
 
 
 )

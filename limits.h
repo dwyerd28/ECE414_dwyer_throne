@@ -1,6 +1,10 @@
+// limits.h
 #pragma once
 #include <stdbool.h>
 
-void limits_init(float xmin, float xmax, float ymin, float ymax);
-bool limits_point_ok_mm(float x_mm, float y_mm);
-void limits_get_bounds(float* xmin, float* xmax, float* ymin, float* ymax);
+// Initialize limits (if needed)
+void limits_init(void);
+
+// Returns true if (x_mm, y_mm) is inside allowed area
+bool limits_within(float x_mm, float y_mm);
+

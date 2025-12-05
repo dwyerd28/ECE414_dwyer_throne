@@ -1,132 +1,139 @@
+// motor.c
 #include "motor.h"
+#include "pins.h"
 #include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "hardware/pwm.h"
-#include "hw_pins.h"
-#include "coord_setup.h"
-#include "config.h"
+#include <stdint.h>
 
-// We keep pose in *cartesian* steps (X,Y), not motor A/B steps.
-static MotorPose pose = {0, 0};
+// Steps per millimeter in FULL STEP mode with GT2 (2 mm pitch) and 20T pulley:
+// 200 steps/rev / 40 mm/rev = 5 steps/mm
+#define STEPS_PER_MM          5.0f
 
-// Generate one step pulse
-static inline void pulse(uint pin, uint32_t us_high, uint32_t us_low) {
-    gpio_put(pin, 1);
-    sleep_us(us_high);
-    gpio_put(pin, 0);
-    sleep_us(us_low);
+// Step timing parameters (tune for speed)
+// Pulse width to satisfy DRV8825 timing
+#define STEPPER_PULSE_US      3      // high time on STEP pin
+#define STEPPER_STEP_DELAY_US 1000   // delay between micro-steps (speed)
+
+// Current Cartesian position in *steps*
+static int32_t cur_x_steps = 0;
+static int32_t cur_y_steps = 0;
+
+// Current motor A/B positions in steps (CoreXY)
+static int32_t cur_a_steps = 0;
+static int32_t cur_b_steps = 0;
+
+static inline int32_t mm_to_steps(float mm) {
+    float s = mm * STEPS_PER_MM;
+    if (s >= 0.0f) s += 0.5f; else s -= 0.5f; // round to nearest
+    return (int32_t)s;
 }
 
-// Step two *motors* (A and B) by integer deltas (da, db).
-static void step_two_motors(int32_t da, int32_t db) {
-    int sa; 
-    int sb; 
+// Low-level function: step both motors according to CoreXY deltas
+static void motor_step_corexy(int32_t da, int32_t db) {
+    int32_t steps_a = (da >= 0) ? da : -da;
+     int32_t steps_b = (db >= 0) ? db : -db;
+   
 
-    if (da >= 0) { 
-        sa = 1; 
-    } else { 
-        sa = -1; 
-    }
-    if (db >= 0) { 
-        sb = 1; 
-    } else { 
-        sb = -1; 
-    }
+    // Set direction pins
+    // gpio_put(PIN_MOTOR_A_DIR, (da >= 0) ? 1 : 0);
+    // gpio_put(PIN_MOTOR_B_DIR, (db >= 0) ? 1 : 0);
+       gpio_put(PIN_MOTOR_A_DIR, (da >= 0));
+    gpio_put(PIN_MOTOR_B_DIR, (db >= 0));
 
-    // apply optional direction inversions from config
-    if (INVERT_MOTOR_A_DIR) { sa = -sa; }
-    if (INVERT_MOTOR_B_DIR) { sb = -sb; }
+    int32_t max_steps = (steps_a > steps_b) ? steps_a : steps_b;
+    if (max_steps == 0) return;
 
-    // magnitudes
-    da = sa * da;
-    db = sb * db;
+    int32_t err_a = max_steps / 2;
+    int32_t err_b = max_steps / 2;
+    int32_t done_a = 0;
+    int32_t done_b = 0;
 
-    // set DIR pins
-    if (sa > 0) { 
-        gpio_put(PIN_MOTOR_A_DIR, 1); 
-    } else { 
-        gpio_put(PIN_MOTOR_A_DIR, 0); 
-    }
-    if (sb > 0) { 
-        gpio_put(PIN_MOTOR_B_DIR, 1); 
-    } else { 
-        gpio_put(PIN_MOTOR_B_DIR, 0); 
-    }
+    for (int32_t i = 0; i < max_steps; i++) {
+        bool stepA = false;
+        bool stepB = false;
 
-
-    int32_t err;
-    if (da > db) { err = da; } else { err = -db; }
-    err = err / 2;
-
-    int32_t a = 0;
-    int32_t b = 0;
-
-    while ((a < da) || (b < db)) {
-        int32_t e2 = err;
-
-        if ((e2 > -da) && (a < da)) {
-            err = err - db;
-            a = a + 1;
-            pulse(PIN_MOTOR_A_STEP, 2, 2);
+        err_a -= steps_a;
+        if (err_a < 0 && done_a < steps_a) {
+            err_a += max_steps;
+            stepA = true;
+            done_a++;
+            cur_a_steps += (da >= 0) ? 1 : -1;
         }
-        if ((e2 <  db) && (b < db)) {
-            err = err + da;
-            b = b + 1;
-            pulse(PIN_MOTOR_B_STEP, 2, 2);
+
+        err_b -= steps_b;
+        if (err_b < 0 && done_b < steps_b) {
+            err_b += max_steps;
+            stepB = true;
+            done_b++;
+            cur_b_steps += (db >= 0) ? 1 : -1;
         }
+
+        // Generate STEP pulses
+        if (stepA) gpio_put(PIN_MOTOR_A_STEP, 1);
+        if (stepB) gpio_put(PIN_MOTOR_B_STEP, 1);
+
+        sleep_us(STEPPER_PULSE_US);
+
+        if (stepA) gpio_put(PIN_MOTOR_A_STEP, 0);
+        if (stepB) gpio_put(PIN_MOTOR_B_STEP, 0);
+
+        sleep_us(STEPPER_STEP_DELAY_US);
     }
 }
 
-// Servo helpers 
-static void servo_pwm_setup(uint gpio) {
-    gpio_set_function(gpio, GPIO_FUNC_PWM);
-    uint slice = pwm_gpio_to_slice_num(gpio);
-    pwm_config cfg = pwm_get_default_config();
-    pwm_config_set_clkdiv(&cfg, 64.f);
-    pwm_init(slice, &cfg, true);
-}
-
-static void servo_write_us(uint gpio, uint us) {
-    uint slice = pwm_gpio_to_slice_num(gpio);
-    uint16_t wrap = 20000;  
-    pwm_set_wrap(slice, wrap);
-    pwm_set_gpio_level(gpio, (uint16_t)((us * wrap) / 20000));
-}
-
-// Public API 
 void motor_init(void) {
-    gpio_init(PIN_MOTOR_A_STEP); gpio_set_dir(PIN_MOTOR_A_STEP, GPIO_OUT);
-    gpio_init(PIN_MOTOR_A_DIR ); gpio_set_dir(PIN_MOTOR_A_DIR , GPIO_OUT);
-    gpio_init(PIN_MOTOR_B_STEP); gpio_set_dir(PIN_MOTOR_B_STEP, GPIO_OUT);
-    gpio_init(PIN_MOTOR_B_DIR ); gpio_set_dir(PIN_MOTOR_B_DIR , GPIO_OUT);
+    gpio_init(PIN_MOTOR_A_STEP);
+    gpio_set_dir(PIN_MOTOR_A_STEP, GPIO_OUT);
+    gpio_put(PIN_MOTOR_A_STEP, 0);
+
+    gpio_init(PIN_MOTOR_A_DIR);
+    gpio_set_dir(PIN_MOTOR_A_DIR, GPIO_OUT);
+    gpio_put(PIN_MOTOR_A_DIR, 0);
+
+    gpio_init(PIN_MOTOR_B_STEP);
+    gpio_set_dir(PIN_MOTOR_B_STEP, GPIO_OUT);
+    gpio_put(PIN_MOTOR_B_STEP, 0);
+
+    gpio_init(PIN_MOTOR_B_DIR);
+    gpio_set_dir(PIN_MOTOR_B_DIR, GPIO_OUT);
+    gpio_put(PIN_MOTOR_B_DIR, 0);
+
+    cur_x_steps = cur_y_steps = 0;
+    cur_a_steps = cur_b_steps = 0;
 }
 
-void motor_pen_init(void) { servo_pwm_setup(PIN_SERVO); motor_pen_up(); }
-void motor_pen_up(void)   { servo_write_us(PIN_SERVO, 1100); }
-void motor_pen_down(void) { servo_write_us(PIN_SERVO, 1700); }
+// Move in mm using CoreXY kinematics
+bool motor_move_to_mm(float x_mm, float y_mm) {
+    int32_t target_x_steps = mm_to_steps(x_mm);
+    int32_t target_y_steps = mm_to_steps(y_mm);
 
-void motor_move_to_mm(float x_mm, float y_mm) {
-    // Convert target CARTESIAN mm → absolute CARTESIAN steps
-    int32_t tx = (int32_t)(x_mm * coord_steps_per_mm_x() + 0.5f);
-    int32_t ty = (int32_t)(y_mm * coord_steps_per_mm_y() + 0.5f);
+    int32_t dx = target_x_steps - cur_x_steps;
+    int32_t dy = target_y_steps - cur_y_steps;
 
-    // Cartesian deltas
-    int32_t dx = tx - pose.x_steps;
-    int32_t dy = ty - pose.y_steps;
+    // CoreXY transform: A = X + Y, B = X - Y
+    int32_t da = (dx + dy);
+    int32_t db = (dx - dy);
 
-    // CoreXY mapping
-    // Motor A tracks (dx + dy); Motor B tracks (dx - dy).
-    int32_t da = dx + dy;
-    int32_t db = dx - dy;
+    
 
-    // Step motors by (da, db)
-    step_two_motors(da, db);
+    motor_step_corexy(da, db);
 
-    // Update 
-    pose.x_steps = pose.x_steps + dx;
-    pose.y_steps = pose.y_steps + dy;
+    cur_x_steps = target_x_steps;
+    cur_y_steps = target_y_steps;
+    return true;
 }
 
-MotorPose motor_get_pose(void) { 
-    return pose;
- }
+void motor_emergency_stop(void) {
+    // For now, just stop stepping. If you wire ENABLE pins,
+    // you can also disable the drivers here.
+    gpio_put(PIN_MOTOR_A_STEP, 0);
+    gpio_put(PIN_MOTOR_B_STEP, 0);
+}
+
+float motor_get_x_mm(void) {
+    return (float)cur_x_steps / STEPS_PER_MM;
+}
+
+float motor_get_y_mm(void) {
+    return (float)cur_y_steps / STEPS_PER_MM;
+}
+

@@ -1,17 +1,18 @@
+// motor.h
 #pragma once
-#include <stdint.h>
+#include <stdbool.h>
 
-typedef struct {
-    int32_t x_steps;
-    int32_t y_steps;
-} MotorPose;
+// Initialize stepper GPIO and internal position tracking
+void motor_init(void);
 
-void motor_init(void);      // setup STEP/DIR pins
-void motor_pen_init(void);  // setup PWM for servo and raise pen
-void motor_pen_up(void);    // pen lift 
-void motor_pen_down(void);  // pen down 
+// Move in Cartesian coordinates (mm) using CoreXY kinematics.
+// Returns true on success.
+bool motor_move_to_mm(float x_mm, float y_mm);
 
+// Immediately stop (used if limits exceeded or fault)
+void motor_emergency_stop(void);
 
-void motor_move_to_mm(float x_mm, float y_mm); 
-MotorPose motor_get_pose(void);   
-            
+// Optional helpers
+float motor_get_x_mm(void);
+float motor_get_y_mm(void);
+
