@@ -1,1 +1,38 @@
+Project Overview:
+This project implements a 2D drawing robot capable of reproducing predefined
+coordinate paths onto paper using pen. The system is controlled by the Raspberry 
+Pi Pico and uses a CoreXY configuration driven by two stepper motors and a servo
+motor. Drawing is executed throuhg a FSM that manages of initialization, motion,
+pen controls and completion.
 
+Hardware materials:
+Raspberry Pi Pico (RP2040)
+Two NEMA 17 stepper motors
+Two DRV8825 stepper motor drivers
+SG90 servo motor (pen up/down)
+GT2 timing belts and pulleys (CoreXY configuration)
+LCD display (non-touch mode)
+External motor power supply
+Mechanical drawing frame
+
+Project structure:
+main.c:
+Implements the finite state machine (FSM) that controls overall system behavior.
+motor.c / motor.h:
+Handles CoreXY motion control, step pulse generation, and direction logic for the stepper motors.
+coordsetup.c / coordsetup.h:
+Defines the drawing path as a list of X/Y coordinate points and pen states.
+limits.c / limits.h:
+Enforces software-defined motion limits to prevent movement outside the drawing area.
+servo.c / servo.h:
+Controls pen up/down motion using PWM.
+LCD-related files:
+Provide display functionality for drawing progress and system status.
+
+How to run project:
+1) Connect all hardware components to pins definitions in source code.
+2) Open the project using Raspberry Pi Pico SDK
+3) Build and flash  the firmware to pico
+4) power stepper motors using external power supply
+5) place paper and pen in drawing area
+6) Power on system
