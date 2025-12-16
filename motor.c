@@ -1,39 +1,36 @@
-// motor.c
 #include "motor.h"
 #include "pins.h"
 #include "pico/stdlib.h"
 #include <stdint.h>
 
-// Steps per millimeter in FULL STEP mode with GT2 (2 mm pitch) and 20T pulley:
 // 200 steps/rev / 40 mm/rev = 5 steps/mm
+//motor steps to move a millimieter
 #define STEPS_PER_MM          5.0f
 
-// Step timing parameters (tune for speed)
-// Pulse width to satisfy DRV8825 timing
+// PWM to satisfy DRV8825 timing
 #define STEPPER_PULSE_US      3      // high time on STEP pin
 #define STEPPER_STEP_DELAY_US 1000   // delay between micro-steps (speed)
 
-// Current Cartesian position in *steps*
 static int32_t cur_x_steps = 0;
 static int32_t cur_y_steps = 0;
 
-// Current motor A/B positions in steps (CoreXY)
+// current motor A/B positions in steps (CoreXY)
 static int32_t cur_a_steps = 0;
 static int32_t cur_b_steps = 0;
 
 static inline int32_t mm_to_steps(float mm) {
     float s = mm * STEPS_PER_MM;
-    if (s >= 0.0f) s += 0.5f; else s -= 0.5f; // round to nearest
+    if (s >= 0.0f) s += 0.5f; else s -= 0.5f; 
     return (int32_t)s;
 }
 
-// Low-level function: step both motors according to CoreXY deltas
+//steps both motors
 static void motor_step_corexy(int32_t da, int32_t db) {
     int32_t steps_a = (da >= 0) ? da : -da;
      int32_t steps_b = (db >= 0) ? db : -db;
    
 
-    // Set direction pins
+    // set direction pins
     // gpio_put(PIN_MOTOR_A_DIR, (da >= 0) ? 1 : 0);
     // gpio_put(PIN_MOTOR_B_DIR, (db >= 0) ? 1 : 0);
        gpio_put(PIN_MOTOR_A_DIR, (da >= 0));
@@ -67,7 +64,7 @@ static void motor_step_corexy(int32_t da, int32_t db) {
             cur_b_steps += (db >= 0) ? 1 : -1;
         }
 
-        // Generate STEP pulses
+        // generate STEP pulses
         if (stepA) gpio_put(PIN_MOTOR_A_STEP, 1);
         if (stepB) gpio_put(PIN_MOTOR_B_STEP, 1);
 
@@ -101,7 +98,7 @@ void motor_init(void) {
     cur_a_steps = cur_b_steps = 0;
 }
 
-// Move in mm using CoreXY kinematics
+// move in mm using CoreXY kinematics
 bool motor_move_to_mm(float x_mm, float y_mm) {
     int32_t target_x_steps = mm_to_steps(x_mm);
     int32_t target_y_steps = mm_to_steps(y_mm);
@@ -123,8 +120,8 @@ bool motor_move_to_mm(float x_mm, float y_mm) {
 }
 
 void motor_emergency_stop(void) {
-    // For now, just stop stepping. If you wire ENABLE pins,
-    // you can also disable the drivers here.
+  
+    //can disable drivers
     gpio_put(PIN_MOTOR_A_STEP, 0);
     gpio_put(PIN_MOTOR_B_STEP, 0);
 }
@@ -136,4 +133,5 @@ float motor_get_x_mm(void) {
 float motor_get_y_mm(void) {
     return (float)cur_y_steps / STEPS_PER_MM;
 }
+
 
