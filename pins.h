@@ -1,4 +1,3 @@
-// pins.h
 #pragma once
 
 // CoreXY motor A
@@ -11,5 +10,6 @@
 
 // Pen servo (SG90)
 #define PIN_SERVO        15
+
 
 
