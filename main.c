@@ -1,4 +1,3 @@
-// main.c
 #include "pico/stdlib.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -35,16 +34,20 @@ static const char *state_name(State s) {
 }
 
 int main() {
+    //initialize usb
     stdio_init_all();
-    sleep_ms(500);  // small startup delay to let USB come up
+
+    sleep_ms(500);  
 
     printf("\n=== CoreXY Drawing Robot Start ===\n");
 
+    //initilize hardware subsystems
     limits_init();
     motor_init();
     servo_init();
     ui_lcd_init();
 
+    //starts FSM
     State state = ST_BOOT;
     bool pen_is_down = false;
 
@@ -54,29 +57,35 @@ int main() {
     //printf("[INIT] Finished hardware init, entering main loop.\n");
 
     while (1) {
-        // Optional small delay so prints are readable and USB isn't spammed
+       //delay
         sleep_ms(5);
 
         switch (state) {
 
+            //intializes all the hardware and set up the robot for drawing
         case ST_BOOT:
             printf("[FSM] State = %s\n", state_name(state));
             printf("[BOOT] Transitioning to ST_LOAD.\n");
             state = ST_LOAD;
             break;
 
+             //Loads the coordinate points that the robot will follow for the drawing.
         case ST_LOAD:
             printf("[FSM] State = %s\n", state_name(state));
+            //gets number of drawing points
             point_count = coord_get_count();
+            //starts at first point
             point_index = 0;
             printf("[LOAD] Path loaded with %u points.\n", (unsigned int)point_count);
 
+            //resets lcd progress bar
             ui_lcd_update_progress(0, point_count);
 
             printf("[LOAD] Forcing pen up, going to ST_PEN_UP.\n");
             state = ST_PEN_UP;
             break;
 
+             //Raises the pen using the servo so the robot can move without drawing.
         case ST_PEN_UP:
             printf("[FSM] State = %s\n", state_name(state));
             if (pen_is_down) {
@@ -90,9 +99,11 @@ int main() {
             state = ST_MOVE;
             break;
 
+            //Moves the robot to the next starting point with the pen lifted.
         case ST_MOVE: {
             printf("[FSM] State = %s\n", state_name(state));
 
+            //if weve done all the points, we are done
             if (point_index >= point_count) {
                 printf("[MOVE] No more points (index=%u, count=%u). Going to ST_DONE.\n",
                        (unsigned int)point_index, (unsigned int)point_count);
@@ -119,6 +130,7 @@ int main() {
             }
 
             // Travel move (pen up)
+            //checks limits as well
             if (!limits_within(pt->x_mm, pt->y_mm)) {
                 printf("[LIMIT] Travel target OUT OF BOUNDS! (x=%.2f, y=%.2f)\n",
                        pt->x_mm, pt->y_mm);
@@ -128,9 +140,11 @@ int main() {
                 break;
             }
 
+            //moves motors to next coordinate with pen up
             printf("[MOVE] Moving (pen UP) to (%.2f, %.2f)\n", pt->x_mm, pt->y_mm);
             motor_move_to_mm(pt->x_mm, pt->y_mm);
 
+            //move to next point
             point_index++;
             printf("[MOVE] Completed point %u of %u.\n",
                    (unsigned int)point_index, (unsigned int)point_count);
@@ -140,6 +154,7 @@ int main() {
             break;
         }
 
+            //Lowers the pen using the servo to prepare for drawing.
         case ST_PEN_DOWN:
             printf("[FSM] State = %s\n", state_name(state));
             if (!pen_is_down) {
@@ -153,9 +168,11 @@ int main() {
             state = ST_DRAW;
             break;
 
+            //Drives the motors to trace the shape between coordinate points.
         case ST_DRAW: {
             printf("[FSM] State = %s\n", state_name(state));
 
+            //stop if all points have been done
             if (point_index >= point_count) {
                 printf("[DRAW] No more points (index=%u, count=%u). Going to ST_DONE.\n",
                        (unsigned int)point_index, (unsigned int)point_count);
@@ -181,6 +198,7 @@ int main() {
                 break;
             }
 
+            //checking limits
             if (!limits_within(pt->x_mm, pt->y_mm)) {
                 printf("[LIMIT] DRAW target OUT OF BOUNDS! (x=%.2f, y=%.2f)\n",
                        pt->x_mm, pt->y_mm);
@@ -190,9 +208,11 @@ int main() {
                 break;
             }
 
+            //moves motor while drawing
             printf("[DRAW] Moving (pen DOWN) to (%.2f, %.2f)\n", pt->x_mm, pt->y_mm);
             motor_move_to_mm(pt->x_mm, pt->y_mm);
 
+            //advance to next drawing point
             point_index++;
             printf("[DRAW] Completed point %u of %u.\n",
                    (unsigned int)point_index, (unsigned int)point_count);
@@ -202,6 +222,7 @@ int main() {
             break;
         }
 
+            //Stops all motion and indicates that the drawing is complete.
         case ST_DONE:
             printf("[FSM] State = %s\n", state_name(state));
             printf("[DONE] Drawing complete or stopped. Showing DONE message.\n");
@@ -228,5 +249,6 @@ int main() {
 
     return 0;
 }
+
 
 
