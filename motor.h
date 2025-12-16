@@ -1,18 +1,18 @@
-// motor.h
 #pragma once
 #include <stdbool.h>
 
-// Initialize stepper GPIO and internal position tracking
+//initialize stepper GPIO
 void motor_init(void);
 
-// Move in Cartesian coordinates (mm) using CoreXY kinematics.
-// Returns true on success.
+
+//move in mm using CoreXY kinematics
 bool motor_move_to_mm(float x_mm, float y_mm);
 
-// Immediately stop (used if limits exceeded or fault)
+// immeditely stop
 void motor_emergency_stop(void);
 
 // Optional helpers
 float motor_get_x_mm(void);
 float motor_get_y_mm(void);
+
 
